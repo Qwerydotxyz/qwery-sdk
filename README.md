@@ -37,12 +37,12 @@ await qwery.signAndSettle(payment, userWallet);
 
 ## Features
 
-- 🚀 Zero user fees (facilitator pays network fees)
-- ⚡ Instant settlement (<2 seconds)
-- 💰 Multi-token support (SOL, USDC, USDT)
-- 🔒 Type-safe TypeScript API
-- 📦 Tree-shakeable ESM build
-- 🌐 Works in browser and Node.js
+- Zero user fees (facilitator pays network fees)
+- Instant settlement (<2 seconds)
+- Multi-token support (SOL, USDC, USDT)
+- Type-safe TypeScript API
+- Tree-shakeable ESM build
+- Works in browser and Node.js
 
 ## API Reference
 
@@ -168,5 +168,5 @@ MIT © Qwery
 ---
 
 <div align="center">
-  Made with ❤️ by the Qwery team
+  Made with 🍆  by the Qwery team
 </div>
