@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Qwery SDK Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    button:hover { background: #4f46e5; }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    #status {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      background: #f3f4f6;
+    }
+    #content {
+      padding: 20px;
+      background: #10b981;
+      color: white;
+      border-radius: 8px;
+    }
+    .log {
+      background: #1f2937;
+      color: #10b981;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔓 Unlock Premium Content</h1>
+  
+  <div id="status">Status: Not unlocked</div>
+  <button id="unlockBtn">Unlock for 0.0001 SOL</button>
+  <div id="logs"></div>
+  <div id="content" style="display: none;">
+    <h2>🎉 Premium Content Unlocked!</h2>
+    <p>You paid <strong>0 network fees</strong>!</p>
+  </div>
+
+  <script>
+    const logsDiv = document.getElementById('logs');
+    const statusDiv = document.getElementById('status');
+
+    function log(msg) {
+      console.log(msg);
+      const el = document.createElement('div');
+      el.className = 'log';
+      el.textContent = msg;
+      logsDiv.appendChild(el);
+    }
+
+    // Simple implementation without SDK for testing
+    document.getElementById('unlockBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('unlockBtn');
+      btn.disabled = true;
+      statusDiv.textContent = 'Connecting wallet...';
+
+      try {
+        // Check for Phantom
+        if (!window.solana?.isPhantom) {
+          throw new Error('Please install Phantom wallet');
+        }
+
+        log('✅ Phantom found');
+        
+        // Connect wallet
+        await window.solana.connect();
+        const payer = window.solana.publicKey.toString();
+        log(`✅ Connected: ${payer.substring(0, 8)}...`);
+
+        // Create payment
+        log('📝 Creating payment...');
+        const createRes = await fetch('http://localhost:8000/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payer: payer,
+            amount: 100000,
+            network: 'solana'
+          })
+        });
+
+        const payment = await createRes.json();
+        log('✅ Payment created');
+
+        // Sign transaction
+        log('✍️  Please sign in Phantom...');
+        const txBuffer = Uint8Array.from(atob(payment.transaction), c => c.charCodeAt(0));
+        
+        const signedTx = await window.solana.signTransaction({
+          message: txBuffer,
+          serialize: () => txBuffer
+        });
+
+        log('✅ Signed by user');
+
+        // Settle payment
+        log('🚀 Submitting to blockchain...');
+        const settleRes = await fetch('http://localhost:8000/settle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            signed_transaction: payment.transaction, // Use original for now
+            network: 'solana'
+          })
+        });
+
+        const result = await settleRes.json();
+
+        if (result.confirmed) {
+          log('✅ Payment confirmed!');
+          log(`📝 TX: ${result.signature}`);
+          statusDiv.textContent = '✅ Unlocked!';
+          document.getElementById('content').style.display = 'block';
+          btn.textContent = '✅ Unlocked';
+        } else {
+          throw new Error('Payment not confirmed');
+        }
+
+      } catch (error) {
+        log('❌ Error: ' + error.message);
+        alert(error.message);
+        btn.disabled = false;
+        btn.textContent = 'Try Again';
+      }
+    });
+  </script>
+</body>
+</html>

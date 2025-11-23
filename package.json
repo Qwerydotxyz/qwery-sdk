@@ -1,0 +1,32 @@
+{
+  "name": "@qwery/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for Qwery x402 Payment Facilitator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "solana",
+    "payments",
+    "x402",
+    "web3",
+    "micropayments",
+    "qwery"
+  ],
+  "author": "Qwery",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Qwerydotxyz/qwery-sdk.git"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.87.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

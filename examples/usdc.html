@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>USDC Payment Test</title>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+    button { background: #6366f1; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 10px 0; }
+    button:hover { background: #4f46e5; }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    #status { padding: 15px; border-radius: 8px; margin: 20px 0; background: #f3f4f6; }
+    #content { padding: 20px; background: #10b981; color: white; border-radius: 8px; }
+    .log { background: #1f2937; color: #10b981; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🪙 USDC Payment Test</h1>
+  
+  <div id="status">Status: Ready</div>
+  
+  <button id="usdcBtn">Pay 0.1 USDC</button>
+  <button id="solBtn">Pay 0.0001 SOL</button>
+  
+  <div id="logs"></div>
+  
+  <div id="content" style="display: none;">
+    <h2>🎉 Payment Successful!</h2>
+    <p>Transaction confirmed on blockchain!</p>
+  </div>
+
+  <script>
+    const logsDiv = document.getElementById('logs');
+    const statusDiv = document.getElementById('status');
+
+    function log(msg) {
+      console.log(msg);
+      const el = document.createElement('div');
+      el.className = 'log';
+      el.textContent = msg;
+      logsDiv.appendChild(el);
+    }
+
+    async function makePayment(amount, token) {
+      const btn = event.target;
+      btn.disabled = true;
+      statusDiv.textContent = 'Connecting wallet...';
+
+      try {
+        if (!window.solana?.isPhantom) {
+          throw new Error('Please install Phantom wallet');
+        }
+
+        log(`✅ Phantom found`);
+        
+        await window.solana.connect();
+        const payer = window.solana.publicKey.toString();
+        log(`✅ Connected: ${payer.substring(0, 8)}...`);
+
+        log(`📝 Creating ${token} payment...`);
+        const createRes = await fetch('http://localhost:8000/create-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payer: payer,
+            amount: amount,
+            token: token,
+            network: 'solana'
+          })
+        });
+
+        if (!createRes.ok) {
+          const error = await createRes.json();
+          throw new Error(error.detail?.error || 'Failed to create payment');
+        }
+
+        const payment = await createRes.json();
+        log(`✅ ${token} payment created`);
+
+        log('✍️  Please sign in Phantom...');
+        
+        // CRITICAL: Properly deserialize and sign
+        const txBuffer = Uint8Array.from(atob(payment.transaction), c => c.charCodeAt(0));
+        const transaction = solanaWeb3.Transaction.from(txBuffer);
+        
+        // Sign with Phantom (preserves existing signatures)
+        const { signature } = await window.solana.signAndSendTransaction(transaction);
+        
+        log('✅ Transaction submitted!');
+        log(`📝 Signature: ${signature}`);
+        
+        // Wait for confirmation
+        statusDiv.textContent = 'Waiting for confirmation...';
+        log('⏳ Waiting for confirmation...');
+        
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Check on Solscan
+        const solscanUrl = `https://solscan.io/tx/${signature}`;
+        log(`🌐 Solscan: ${solscanUrl}`);
+        
+        statusDiv.textContent = '✅ Payment successful!';
+        document.getElementById('content').style.display = 'block';
+        btn.textContent = '✅ Success!';
+
+      } catch (error) {
+        log('❌ Error: ' + error.message);
+        console.error(error);
+        alert(error.message);
+        btn.disabled = false;
+        statusDiv.textContent = 'Error occurred';
+      }
+    }
+
+    document.getElementById('usdcBtn').addEventListener('click', () => {
+      makePayment(100000, 'USDC');  // 0.1 USDC (6 decimals)
+    });
+
+    document.getElementById('solBtn').addEventListener('click', () => {
+      makePayment(100000, 'SOL');  // 0.0001 SOL (9 decimals)
+    });
+  </script>
+</body>
+</html>

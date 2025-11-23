@@ -1,0 +1,28 @@
+# Source files (only ship dist/)
+src/
+tsconfig.json
+*.ts
+!*.d.ts
+
+# Config files
+.gitignore
+.eslintrc*
+.prettierrc*
+
+# Documentation (except README)
+docs/
+examples/
+
+# Development
+node_modules/
+.vscode/
+.idea/
+
+# CI/CD
+.github/
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+__tests__/
+coverage/
