@@ -35,10 +35,10 @@ export class QweryPayment {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail?.error || 'Failed to create payment');
+      throw new Error((error as any).detail?.error || 'Failed to create payment');
     }
 
-    return await response.json();
+    return await response.json() as any;
   }
 
   async settlePayment(request: SettlePaymentRequest): Promise<SettlePaymentResponse> {
@@ -50,10 +50,10 @@ export class QweryPayment {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail?.error || 'Failed to settle payment');
+      throw new Error((error as any).detail?.error || 'Failed to settle payment');
     }
 
-    return await response.json();
+    return await response.json() as any;
   }
 
   async unlockContent(options: UnlockContentOptions): Promise<PaymentResult> {
@@ -137,6 +137,6 @@ export class QweryPayment {
     const response = await fetch(
       `${this.facilitatorUrl}/wallet-status?network=${network}`
     );
-    return await response.json();
+    return await response.json() as any;
   }
 }
