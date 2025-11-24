@@ -1,6 +1,6 @@
 {
   "name": "@qwerydotxyz/qwery-sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "TypeScript SDK for Qwery x402 Payment Facilitator",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
