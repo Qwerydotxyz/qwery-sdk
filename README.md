@@ -4,7 +4,7 @@
 
 # Qwery SDK
 
-TypeScript SDK for integrating Qwery x402 Payment Facilitator into your applications.
+TypeScript SDK for integrating Qwery x402 Payment Facilitator into your applications
 
 [![npm version](https://badge.fury.io/js/@qwerydotxyz%2Fqwery-sdk.svg)](https://www.npmjs.com/package/@qwerydotxyz/qwery-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
